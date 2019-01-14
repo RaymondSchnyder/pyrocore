@@ -5,6 +5,7 @@ git_projects="pyrobase auvyon"
 echo "~~~ On errors, paste EVERYTHING below ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 deactivate 2>/dev/null
 PYTHON="$1"
+HOUM=/data/pyrocore
 test -z "$PYTHON" -a -x "/usr/bin/python2" && PYTHON="/usr/bin/python2"
 test -z "$PYTHON" -a -x "/usr/bin/python" && PYTHON="/usr/bin/python"
 test -z "$PYTHON" && PYTHON="python"
@@ -70,16 +71,16 @@ for project in $git_projects; do
 done
 
 ln -nfs python ./bin/python-pyrocore
-if test -d ${BIN_DIR:-$HOME/bin}; then
+if test -d ${BIN_DIR:-$HOUM/bin}; then
     # Register new executables
-    ln -nfs $(egrep -l '(from.pyrocore.scripts|entry_point.*pyrocore.*console_scripts)' $PWD/bin/*) ${BIN_DIR:-$HOME/bin}/
-    ln -nfs $PWD/bin/python-pyrocore ${BIN_DIR:-$HOME/bin}/
+    ln -nfs $(egrep -l '(from.pyrocore.scripts|entry_point.*pyrocore.*console_scripts)' $PWD/bin/*) ${BIN_DIR:-$HOUM/bin}/
+    ln -nfs $PWD/bin/python-pyrocore ${BIN_DIR:-$HOUM/bin}/
 
     # Link to example scripts
     find "$PROJECT_ROOT/docs/examples" -name "rt-*" -executable -type f | \
     while read script; do
         name=$(basename "$script")
-        name="${BIN_DIR:-$HOME/bin}/${name%.py}"
+        name="${BIN_DIR:-$HOUM/bin}/${name%.py}"
         if test -L "$name" -o ! -e "$name"; then
             ln -nfs "$script" "$name"
         fi
@@ -88,16 +89,16 @@ fi
 
 # Make sure people update their main config
 rm -f "$PROJECT_ROOT/src/pyrocore/data/config"/rtorrent-0.8.?.rc 2>/dev/null || :
-rm -f "$HOME/.pyroscope"/rtorrent-0.8.?.rc.default 2>/dev/null || :
+rm -f "$HOUM/.pyroscope"/rtorrent-0.8.?.rc.default 2>/dev/null || :
 
 # Update config defaults
-rm -f "$HOME/.pyroscope/rtorrent.d.rc" 2>/dev/null || :
-rm -f "$HOME/.pyroscope/rtorrent.d"/view-zz-collapse.rc* 2>/dev/null || :
+rm -f "$HOUM/.pyroscope/rtorrent.d.rc" 2>/dev/null || :
+rm -f "$HOUM/.pyroscope/rtorrent.d"/view-zz-collapse.rc* 2>/dev/null || :
 ./bin/pyroadmin --create-config
 ./bin/pyroadmin --create-import "~/.pyroscope/rtorrent.d/*.rc.default"
 
 # Relocate to ~/.local
-test "$PROJECT_ROOT" != "$HOME/lib/pyroscope" || cat <<'EOF'
+test "$PROJECT_ROOT" != "$HOUM/lib/pyroscope" || cat <<'EOF'
 
 *****************************************************************************
 The default install location has changed, consider moving to the new path at
@@ -117,4 +118,4 @@ EOF
 ./bin/pyroadmin --version
 
 # Make sure PATH is decent
-( echo $PATH | tr : \\n | egrep "^$HOME/bin/?\$" >/dev/null ) || echo "$HOME/bin is NOT on your PATH, you need to fix that"'!'
+( echo $PATH | tr : \\n | egrep "^$HOUM/bin/?\$" >/dev/null ) || echo "$HOUM/bin is NOT on your PATH, you need to fix that"'!'
